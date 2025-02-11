@@ -1,0 +1,8 @@
+pytesseract
+pdf2image
+fitz
+pymupdf
+requests
+sentence-transformers
+streamlit
+gpt4all
