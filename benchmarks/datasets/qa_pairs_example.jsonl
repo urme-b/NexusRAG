@@ -1,0 +1,3 @@
+{"query": "What is retrieval-augmented generation?", "relevant_doc_ids": [], "expected_answer": "RAG combines information retrieval with text generation to produce grounded answers from a knowledge base."}
+{"query": "How does self-correction work in NexusRAG?", "relevant_doc_ids": [], "expected_answer": "NexusRAG validates retrieval quality before generating answers, reformulating queries if the initial retrieval is insufficient."}
+{"query": "What embedding model does NexusRAG use?", "relevant_doc_ids": [], "expected_answer": "NexusRAG uses all-MiniLM-L6-v2 by default for generating document embeddings."}
