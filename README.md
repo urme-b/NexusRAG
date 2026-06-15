@@ -1,5 +1,9 @@
 # NexusRAG
 
+[![CI](https://github.com/urme-b/NexusRAG/actions/workflows/ci.yml/badge.svg)](https://github.com/urme-b/NexusRAG/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Ask questions across your research papers and get answers with citations you can trust. NexusRAG runs entirely on your machine, grounds every answer in the source text, and ships with a benchmark that measures how well it actually retrieves and verifies — not just a demo.
 
 ![NexusRAG interface](screenshots/nexusrag-ui.png)
