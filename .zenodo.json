@@ -1,0 +1,20 @@
+{
+  "upload_type": "software",
+  "title": "NexusRAG: Local, Self-Correcting Retrieval-Augmented Generation for Scientific Papers",
+  "description": "A fully local RAG system combining dense and sparse retrieval with cross-encoder reranking and sentence-level faithfulness checks, shipped with a reproducible benchmark (nDCG@10, Recall@20, faithfulness F1) on SciFact and NFCorpus.",
+  "creators": [
+    { "name": "Bose, Urme" }
+  ],
+  "license": "MIT",
+  "access_right": "open",
+  "keywords": [
+    "retrieval-augmented-generation",
+    "information-retrieval",
+    "hybrid-retrieval",
+    "reranking",
+    "faithfulness",
+    "semantic-search",
+    "scientific-papers",
+    "nlp"
+  ]
+}
