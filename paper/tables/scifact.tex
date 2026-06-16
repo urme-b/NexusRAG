@@ -1,0 +1,12 @@
+\begin{tabular}{lrrrrrrr}
+\toprule
+System & nDCG@10 & R@5 & R@10 & R@20 & MRR & MAP & $p$ vs BM25 \\
+\midrule
+BM25 & 0.666 & 0.719 & 0.790 & 0.821 & 0.636 & 0.626 & -- \\
+Dense & \textbf{0.708} & \textbf{0.763} & 0.836 & 0.873 & \textbf{0.680} & \textbf{0.667} & 0.032* \\
+\midrule
+Hybrid (RRF) & 0.704 & 0.763 & \textbf{0.840} & \textbf{0.891} & 0.672 & 0.662 & 0.002* \\
++ Adaptive weights & 0.703 & 0.762 & \textbf{0.840} & 0.886 & 0.670 & 0.660 & 0.001* \\
++ Corrective PRF & 0.703 & 0.762 & \textbf{0.840} & 0.886 & 0.670 & 0.660 & 0.001* \\
+\bottomrule
+\end{tabular}

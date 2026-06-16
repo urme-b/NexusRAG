@@ -1,12 +1,12 @@
-\begin{tabular}{lrrrrrr}
+\begin{tabular}{lrrrrrrr}
 \toprule
-System & nDCG@10 & R@5 & R@10 & R@20 & MRR & MAP \\
+System & nDCG@10 & R@5 & R@10 & R@20 & MRR & MAP & $p$ vs BM25 \\
 \midrule
-BM25 & 0.311 & 0.120 & 0.150 & 0.172 & 0.518 & 0.136 \\
-Dense (MiniLM) & 0.319 & 0.120 & 0.159 & 0.189 & 0.510 & 0.136 \\
+BM25 & 0.311 & 0.120 & 0.150 & 0.172 & 0.518 & 0.136 & -- \\
+Dense & 0.340 & 0.127 & 0.161 & 0.197 & 0.538 & 0.150 & 0.009* \\
 \midrule
-Hybrid-RRF & 0.334 & 0.127 & 0.162 & 0.202 & 0.544 & 0.152 \\
-+ Adaptive weights & 0.341 & 0.132 & 0.164 & \textbf{0.207} & \textbf{0.554} & 0.159 \\
-+ Keyword boost & \textbf{0.344} & \textbf{0.133} & \textbf{0.167} & 0.206 & 0.553 & \textbf{0.159} \\
+Hybrid (RRF) & \textbf{0.353} & 0.130 & \textbf{0.165} & \textbf{0.209} & \textbf{0.570} & \textbf{0.162} & $<$0.001* \\
++ Adaptive weights & 0.349 & \textbf{0.133} & 0.162 & 0.201 & 0.566 & 0.158 & $<$0.001* \\
++ Corrective PRF & 0.349 & \textbf{0.133} & 0.162 & 0.201 & 0.566 & 0.158 & $<$0.001* \\
 \bottomrule
 \end{tabular}

@@ -33,10 +33,11 @@ nDCG@10) to clearly above it (\SciDense{}), a paired gain of \SciEmbGain{}
 ($p{=}\SciEmbP{}$). Reciprocal-rank fusion then beats BM25 on both corpora
 ($p{=}\SciHybridP{}$ and $p{=}\NFhybridP{}$) and is the best single system on
 NFCorpus. We add a confidence-gated corrective re-retrieval that expands and
-re-queries only when the first pass is weak, and show it reaches reranker-level
-quality at a fraction of the latency. Finally, we recast faithfulness
-verification as evidence detection and evaluate a small NLI model against
-honest baselines, where it attains \FaithNliAuroc{} ROC-AUC. Every number is
+re-queries only when the first pass is weak, and find it matches plain fusion at
+negligible cost while a cross-encoder reranker is far slower and no better.
+Finally, we recast faithfulness verification as evidence detection and find that
+a relevance cross-encoder---not a dedicated NLI model---is the strongest cheap
+verifier (\FaithCeAuroc{} vs.\ \FaithNliAuroc{} ROC-AUC). Every number is
 regenerated from committed results by \texttt{make eval} on a CPU laptop.
 Code and data: \url{https://github.com/urme-b/NexusRAG}.
 \end{abstract}
@@ -183,21 +184,22 @@ documents). Same conventions as Table~\ref{tab:scifact}.}
 
 \subsection{The corrective loop: quality at a fraction of the cost}
 
-The corrective gate fires only when the first-pass dense similarity is weak, so
-its expected cost is small. Table~\ref{tab:cost} compares it against a
-cross-encoder reranker over the same shortlist. The reranker costs \RerankMs{}
-ms/query against \BaseMs{} ms for plain fusion and \CorrMs{} ms for the
-corrective pass; the corrective pass reaches comparable nDCG@10 without a second
-neural model in the loop. On the queries where the gate fires
-(\SciCorrFire{} of SciFact), its nDCG@10 change is \SciCorrDelta{}
-($p{=}\SciCorrP{}$): selective re-retrieval neither rescues nor harms an
-already-strong retriever at this scale, which is itself worth stating---the
-expensive components a typical pipeline advertises are not what move the metric.
+Because BGE's top-1 similarity is high on nearly all SciFact claims, the
+confidence gate rarely fires---at most \SciCorrMaxFire{} of queries even at an
+aggressive threshold---so the corrective pass behaves almost identically to plain
+fusion at negligible extra cost (\CorrMs{} vs.\ \BaseMs{} ms/query). The contrast
+with reranking is the point (Table~\ref{tab:cost}): the cross-encoder reranker is
+\RerankSlowdown$\times$ slower (\RerankMs{} ms/query) and actually \emph{lowers}
+nDCG@10 (\RerankND{} vs.\ \BaseND{}) on this shortlist. Spending a second pass on
+confidence-gated re-retrieval rather than a reranker is the better default; and
+where a strong embedder already retrieves confidently, the cheapest effective
+second pass is often none at all.
 
 \begin{table}[t]
 \centering
-\caption{Cost vs.\ quality on SciFact. The corrective pass matches the reranker's
-quality at a small fraction of its per-query latency.}
+\caption{Cost vs.\ quality on SciFact (timed on 120 queries). The cross-encoder
+reranker is far slower and does not improve nDCG@10 over plain fusion; the
+corrective pass adds negligible cost.}
 \label{tab:cost}
 \small
 \input{tables/cost_quality}
@@ -209,12 +211,15 @@ We score every sentence of a claim's cited abstract for whether it is gold
 evidence, using NLI relatedness ($1-P(\text{neutral})$), lexical overlap, and a
 relevance cross-encoder, and evaluate as threshold-free detection over
 \FaithClaims{} dev claims (gold base rate \FaithBaseRate{}).
-Table~\ref{tab:faith} reports the result: the NLI model reaches \FaithNliAuroc{}
-ROC-AUC and \FaithNliPr{} PR-AUC, above lexical overlap (\FaithLexAuroc{}) and a
-relevance cross-encoder (\FaithCeAuroc{}). Reported as detection rather than a
-single thresholded F1, the small NLI verifier is a genuinely usable, content-
-inspecting signal---and the comparison is against baselines that can lose, not a
-citation check that scores zero by construction.
+Table~\ref{tab:faith} reports the result, and it is a useful corrective to the
+intuition that an entailment model is the obvious verifier: the relevance
+cross-encoder is the strongest detector (\FaithCeAuroc{} ROC-AUC), with NLI
+relatedness (\FaithNliAuroc{}) only marginally above lexical overlap
+(\FaithLexAuroc{}). The lesson is methodological as much as empirical---reported
+as detection against baselines that can lose, rather than against a citation
+check that scores zero by construction, a content-inspecting signal is a real,
+usable measure of support, and the cross-encoder already in the retrieval
+pipeline doubles as the best cheap verifier on this task.
 
 \begin{table}[t]
 \centering
@@ -233,9 +238,9 @@ rank fusion adds a reliable, free improvement, especially on longer documents;
 and a cross-encoder reranker buys little for its one-to-two order of magnitude
 latency cost on these benchmarks. A cheap confidence-gated re-retrieval is a
 better place to spend a second pass than a reranker. For verification, the
-distinction that matters is content versus syntax: an entailment signal, reported
-honestly as a detector, gives a real measure of whether a source supports a
-claim, and a place to gate the corrective loop.
+distinction that matters is content versus syntax: a content signal---a relevance
+cross-encoder, or an NLI model---reported honestly as a detector gives a real
+measure of whether a source supports a claim, where a citation check cannot.
 
 \section{Limitations}
 
