@@ -219,12 +219,17 @@ relatedness (\FaithNliAuroc{}) only marginally above lexical overlap
 as detection against baselines that can lose, rather than against a citation
 check that scores zero by construction, a content-inspecting signal is a real,
 usable measure of support, and the cross-encoder already in the retrieval
-pipeline doubles as the best cheap verifier on this task.
+pipeline doubles as the best cheap verifier on this task. The selective-prediction
+view sharpens this: the cross-encoder is also far better \emph{calibrated} (ECE
+\FaithCeEce{} vs.\ the NLI model's \FaithNliEce{}), so its score is trustworthy as
+an abstention confidence, whereas the NLI relatedness is miscalibrated and unsafe
+to threshold directly.
 
 \begin{table}[t]
 \centering
-\caption{Evidence-sentence detection on SciFact dev. ROC-AUC and PR-AUC are
-threshold-free; F1 is at the best threshold. Best in bold.}
+\caption{Evidence-sentence detection on SciFact dev. ROC-AUC/PR-AUC are
+threshold-free; F1 at the best threshold; AURC is the risk-coverage area and ECE
+the calibration error (both lower is better). Best in bold.}
 \label{tab:faith}
 \small
 \input{tables/faithfulness}
