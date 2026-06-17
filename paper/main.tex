@@ -34,7 +34,8 @@ nDCG@10) to clearly above it (\SciDense{}), a paired gain of \SciEmbGain{}
 ($p{=}\SciHybridP{}$ and $p{=}\NFhybridP{}$) and is the best single system on
 NFCorpus. We add a confidence-gated corrective re-retrieval that expands and
 re-queries only when the first pass is weak, and find it matches plain fusion at
-negligible cost while a cross-encoder reranker is far slower and no better.
+negligible cost while a cross-encoder reranker is far slower and, on these
+abstract-level corpora, slightly worse.
 Finally, we recast faithfulness verification as evidence detection and find that
 a relevance cross-encoder---not a dedicated NLI model---is the strongest cheap
 verifier (\FaithCeAuroc{} vs.\ \FaithNliAuroc{} ROC-AUC). Every table is
@@ -108,14 +109,18 @@ grounding signal directly as a detector rather than through another model.
 NexusRAG ingests documents (PDF, DOCX, TXT, MD), chunks them, and indexes each
 chunk as both a dense vector and a BM25 entry. At query time it retrieves with
 each method to a fixed depth, fuses the lists with RRF (smoothing constant
-$k{=}60$), and---if the top dense similarity is below a threshold
-$\tau{=}\SciCorrTau{}$---expands the query with frequent terms from the
-first-pass documents and re-retrieves, fusing the two passes. A local model then
+$k{=}\RRFk{}$, the standard value), and---if the top dense similarity is below a
+threshold $\tau$---runs a single pseudo-relevance-feedback pass that expands the
+query with frequent terms from the first-pass documents and re-retrieves, fusing
+the two passes. This is one confidence-gated re-retrieval, not an iterative loop,
+and $\tau$ is selected on a held-out split (Section~\ref{sec:setup}), never on the
+test set. A local model then
 answers using only the retrieved passages with inline citations, and an NLI model
 checks that each answer sentence is entailed by its sources. All retrieval uses
 exact (brute-force) cosine search, so results are deterministic.
 
 \section{Experimental Setup}
+\label{sec:setup}
 
 \paragraph{Data.} SciFact via BEIR is a corpus of \CorpusSize{} abstracts with
 \NumQueries{} test claims and abstract-level judgements; NFCorpus is a biomedical
@@ -128,7 +133,15 @@ binary relevance, each system retrieving to depth 50. We compute 95\% confidence
 intervals by bootstrapping over queries ($10{,}000$ resamples) and test each
 system against BM25 with a two-sided paired randomization test ($10{,}000$
 permutations, add-one estimator), applying a Holm correction across the family of
-comparisons. Marked rows ($^{*}$) survive Holm at $\alpha{=}0.05$.
+comparisons. Marked rows ($^{*}$) survive Holm at $\alpha{=}0.05$. All bootstrap
+and randomization tests use seed \EvalSeed{}, and all dense retrieval is exact
+brute-force cosine search with no approximate-nearest-neighbour index, so the
+reported numbers carry no ANN approximation error.
+
+\paragraph{Held-out gate selection.} The corrective gate threshold $\tau$ is
+tuned on a held-out split---NFCorpus validation and the SciFact train split---and
+then frozen for the test-set evaluation, so the corrective results below are not
+fitted to the queries they are scored on.
 
 \paragraph{Models.} The dense model is \texttt{bge-small-en-v1.5} with the
 recommended query instruction; the reranker is \texttt{ms-marco-MiniLM-L-6-v2};
@@ -150,11 +163,17 @@ dense retrieval to \SciDense{}, a paired improvement of \SciEmbGain{} nDCG@10
 machinery, is the dominant factor.
 
 Given a strong dense model, RRF fusion still helps where the two signals are
-complementary: on NFCorpus it is the best single system (\NFhybrid{} vs.\ BM25
-\NFbm{}, $p{=}\NFhybridP{}$), and on SciFact it beats BM25 (\SciHybrid{},
-$p{=}\SciHybridP{}$) while raising recall, even though it does not exceed the
-already-strong dense model on nDCG. Both fusion contrasts survive Holm
-correction. The last two rungs are deliberately included as negative results:
+complementary, but the win over the strongest baseline is real yet modest. We
+benchmark fusion against BM25, the strongest lexical baseline, not against
+dense-only. On SciFact, hybrid RRF beats BM25 by \SciHybridDelta{} nDCG@10
+(95\% paired bootstrap CI \SciHybridDeltaCI{}, $p{=}\SciHybridP{}$) while raising
+recall, even though it does not exceed the already-strong dense model on nDCG; on
+NFCorpus it is the best single system, beating BM25 by \NFhybridDelta{} nDCG@10
+(CI \NFhybridDeltaCI{}, $p{=}\NFhybridP{}$). Both confidence intervals exclude
+zero, so the improvement is statistically real but small in magnitude---a
+reliable few hundredths of nDCG@10, not a transformative gain. Both fusion
+contrasts also survive Holm correction. The last two rungs are deliberately
+included as negative results:
 query-adaptive fusion weights leave nDCG@10 within $0.001$ of plain fusion on
 both corpora, and the corrective pass (Section~\ref{sec:corrective}) is
 likewise flat---we keep them in the ladder, labelled as the no-ops they are,
@@ -189,23 +208,26 @@ documents). Same conventions as Table~\ref{tab:scifact}.}
 \subsection{The corrective loop: quality at a fraction of the cost}
 \label{sec:corrective}
 
-Because BGE's top-1 similarity is high on nearly all SciFact claims, the
-confidence gate rarely fires---at most \SciCorrMaxFire{} of queries even at an
-aggressive threshold---so the corrective pass behaves almost identically to plain
-fusion at negligible extra cost (\CorrMs{} vs.\ \BaseMs{} ms/query). The contrast
-with reranking is purely cost: the cross-encoder reranker is \RerankSlowdown$\times$
-slower (\RerankMs{} ms/query) for no measurable nDCG@10 gain over plain fusion
-(\RerankND{} vs.\ \BaseND{}; Table~\ref{tab:cost}, timed on the same 120 queries).
-Neither second pass earns its keep on these benchmarks: the reranker is far more
-expensive for nothing, and the corrective gate, where a strong embedder already
-retrieves confidently, simply does not fire---a genuinely negative result we report
-rather than dress up.
+The corrective pass is a single confidence-gated re-retrieval, not an iterative
+loop, with the gate threshold $\tau$ fixed on a held-out split before testing.
+Because BGE's top-1 similarity is high on nearly all SciFact claims, the gate
+rarely fires---at most \SciCorrMaxFire{} of queries even at an aggressive
+threshold---so the corrective pass behaves almost identically to plain fusion and
+is roughly neutral on nDCG@10 at negligible extra cost (\CorrMs{} vs.\ \BaseMs{}
+ms/query). The reranker is the clearer negative result. A cross-encoder reranker
+(\texttt{ms-marco-MiniLM}) does not merely fail to help on these abstract-level
+corpora---it \emph{hurts}: it lowers nDCG@10 to \RerankND{} (from \BaseND{}) and
+Recall@20 to $0.886$ (from $0.900$) while running \RerankSlowdown$\times$ slower
+(\RerankMs{} vs.\ \BaseMs{} ms/query; Table~\ref{tab:cost}, timed on the same 120
+queries). We report this plainly: on these benchmarks the reranker is both slower
+and worse, and the corrective gate, where a strong embedder already retrieves
+confidently, simply does not fire. Neither second pass earns its keep here.
 
 \begin{table}[t]
 \centering
 \caption{Cost vs.\ quality on SciFact (timed on 120 queries). The cross-encoder
-reranker is far slower and does not improve nDCG@10 over plain fusion; the
-corrective pass adds negligible cost.}
+reranker is far slower and \emph{lowers} both nDCG@10 and Recall@20 relative to
+plain fusion; the corrective pass adds negligible cost and is roughly neutral.}
 \label{tab:cost}
 \small
 \input{tables/cost_quality}
@@ -224,7 +246,12 @@ $\FaithCeMinusNli{}$ over NLI), with a claim-bootstrap 95\% CI that clears both
 baselines. NLI relatedness (\FaithNliAuroc{}, 95\% CI
 \FaithNliAurocLo{}--\FaithNliAurocHi{}) is statistically indistinguishable from
 lexical overlap (\FaithLexAuroc{})---their intervals almost entirely
-overlap---so the entailment model buys nothing over word overlap on this task.
+overlap---so the dedicated entailment model is weak here: it is only marginally
+better than lexical overlap and clearly below the cross-encoder, and we state
+that plainly rather than presenting NLI as the verifier of choice. This
+evaluation is on SciFact's own claim-verification data
+(\texttt{scifact-claims}, dev split), where sentence-level gold evidence makes
+the comparison possible.
 The lesson is methodological as much as empirical---reported
 as detection against baselines that can lose, rather than against a citation
 check that scores zero by construction, a content-inspecting signal is a real,
@@ -258,15 +285,47 @@ distinction that matters is content versus syntax: a content signal---a relevanc
 cross-encoder, or an NLI model---reported honestly as a detector gives a real
 measure of whether a source supports a claim, where a citation check cannot.
 
-\section{Limitations}
+\section{Limitations and Reproducibility}
 
-Both benchmarks are biomedical-leaning; broader transfer is untested. We use
-binary relevance, so NFCorpus numbers are not directly comparable to
-graded-nDCG leaderboard scores. The NLI verifier operates at the sentence level,
-so multi-sentence reasoning is only partially captured, and generation quality
-itself is not scored here---the end-to-end harness exists
-(\texttt{nexusrag.eval.generation}) but a small CPU generator is uninformative
-for it.
+\paragraph{Scope of the wins.} Our retrieval gains, though statistically real,
+are small. Hybrid RRF beats the strongest baseline (BM25) by \SciHybridDelta{}
+nDCG@10 \SciHybridDeltaCI{} on SciFact and \NFhybridDelta{} \NFhybridDeltaCI{} on
+NFCorpus; both 95\% paired bootstrap CIs exclude zero, so the win is genuine but
+modest, and we make no claim of a large improvement. The reranker is a negative
+result reported honestly: it lowers both nDCG@10 and Recall@20 on these
+abstract-level corpora at roughly \RerankSlowdown$\times$ the latency, and the
+corrective pass is a single confidence-gated re-retrieval (not an iterative loop)
+that is roughly neutral on nDCG@10 here. We do not claim that reranking or
+correction helps on these benchmarks.
+
+\paragraph{Datasets and breadth.} We evaluate on only two abstract-level BEIR
+datasets---SciFact (\NumQueries{} test claims, the full available set) and
+NFCorpus (\NFqueries{} queries). Both are biomedical-leaning, so broader transfer
+is untested. Generalization to other BEIR tasks (e.g.\ FiQA, SciDocs), domain
+sentence encoders (SPECTER2, SciNCL), additional neural baselines (learned-sparse
+SPLADE, ColBERTv2, monoT5), end-to-end answer-quality evaluation (RAGAS or
+LLM-as-judge), and full-paper chunking ablations are all future work and are
+\emph{not} claimed here. We use binary relevance, so the NFCorpus numbers are not
+directly comparable to graded-nDCG leaderboard scores.
+
+\paragraph{Fusion and verifier caveats.} RRF uses the standard constant
+$k{=}\RRFk{}$; a sensitivity sweep over $k$ is left to future work. The
+faithfulness verifier is validated on SciFact's own claim-verification data
+(\texttt{scifact-claims}, dev split) and is weak: the dedicated NLI scorer
+(DeBERTa) is only marginally above a lexical-overlap baseline and below a
+relevance cross-encoder, so it should not be read as a strong entailment check.
+It operates at the sentence level, so multi-sentence reasoning is only partially
+captured, and generation quality itself is not scored here---the end-to-end
+harness exists (\texttt{nexusrag.eval.generation}) but a small CPU generator is
+uninformative for it.
+
+\paragraph{Reproducibility.} All bootstrap and randomization tests use seed
+\EvalSeed{}, embeddings are deterministic on CPU, and dense retrieval in the
+benchmark is exact brute-force search with no approximate-nearest-neighbour
+index, so the numbers carry no ANN approximation error. The BEIR dataset
+revisions are pinned (SciFact corpus \texttt{b3b5335}, NFCorpus corpus
+\texttt{b5026a0}). The corrective gate threshold $\tau$ is selected on a held-out
+split (NFCorpus validation, SciFact train), never on the test set.
 
 \section{Conclusion}
 
