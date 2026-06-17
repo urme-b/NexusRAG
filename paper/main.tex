@@ -214,22 +214,28 @@ relevance cross-encoder, and evaluate as threshold-free detection over
 \FaithClaims{} dev claims (gold base rate \FaithBaseRate{}).
 Table~\ref{tab:faith} reports the result, and it is a useful corrective to the
 intuition that an entailment model is the obvious verifier: the relevance
-cross-encoder is the strongest detector (\FaithCeAuroc{} ROC-AUC), with NLI
-relatedness (\FaithNliAuroc{}) only marginally above lexical overlap
-(\FaithLexAuroc{}). The lesson is methodological as much as empirical---reported
+cross-encoder is the strongest detector (\FaithCeAuroc{} ROC-AUC,
+$\FaithCeMinusNli{}$ over NLI), with a claim-bootstrap 95\% CI that clears both
+baselines. NLI relatedness (\FaithNliAuroc{}, 95\% CI
+\FaithNliAurocLo{}--\FaithNliAurocHi{}) is statistically indistinguishable from
+lexical overlap (\FaithLexAuroc{})---their intervals almost entirely
+overlap---so the entailment model buys nothing over word overlap on this task.
+The lesson is methodological as much as empirical---reported
 as detection against baselines that can lose, rather than against a citation
 check that scores zero by construction, a content-inspecting signal is a real,
 usable measure of support, and the cross-encoder already in the retrieval
-pipeline doubles as the best cheap verifier on this task. We report only the
-threshold-free ROC-AUC and PR-AUC, on which the ordering is unambiguous; turning
-this signal into a calibrated abstention gate (with post-hoc calibration and a
-held-out threshold split) is left to future work, since the raw scorer outputs
-are on different scales and not directly comparable as confidences.
+pipeline doubles as the best cheap verifier on this task. The ordering is unambiguous on the
+threshold-free ROC-AUC and PR-AUC; the F1 column uses a threshold tuned on a
+disjoint SciFact train split rather than on the dev set it scores, so it reflects
+operating-point performance without peeking. Turning the raw scores into a
+calibrated abstention gate is left to future work, since the three scorers'
+outputs are on different scales and not directly comparable as confidences.
 
 \begin{table}[t]
 \centering
-\caption{Evidence-sentence detection on SciFact dev. ROC-AUC and PR-AUC are
-threshold-free; F1 is at the best threshold. Best in bold.}
+\caption{Evidence-sentence detection on SciFact dev. ROC-AUC (with a
+claim-bootstrap 95\% CI) and PR-AUC are threshold-free; F1 is at a threshold
+tuned on a disjoint train split. Best in bold.}
 \label{tab:faith}
 \small
 \input{tables/faithfulness}
