@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-06-18
+
+### Fixed
+- API-key auth returns 401 (not a 500 crash) on a non-ASCII `X-API-Key`.
+- Citations no longer flatten multi-line answers into a single line.
+- Ingestion is atomic: a partial write rolls back instead of orphaning the doc.
+- Upload size cap is driven by `max_upload_mb` (no shadowed hardcoded limit);
+  libmagic no longer false-rejects valid `.txt`/`.md` files.
+- SPLADE empty-corpus crash, negative adaptive RRF weights, and citation-index
+  gaps from de-duplication.
+- `\SciCorrTau` paper macro reports the held-out `best_tau`, not the config tau.
+- Frontend renders numbered lists and 422 validation errors correctly.
+
+### Added
+- `ExactDenseRetriever` enforces its normalized-embedder (cosine) contract.
+- CI guards: README test-count sync check; `pip-audit` with a documented ignore
+  for the unpatched torch `CVE-2025-3000`.
+
 ## [0.1.0] - 2026-06-18
 
 ### Added
@@ -44,4 +62,5 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Pinned `requirements.lock` / `requirements-runtime.lock`, contributing guide,
   code of conduct, and issue/PR templates.
 
+[0.1.1]: https://github.com/urme-b/NexusRAG/releases/tag/v0.1.1
 [0.1.0]: https://github.com/urme-b/NexusRAG/releases/tag/v0.1.0
