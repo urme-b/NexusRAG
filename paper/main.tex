@@ -188,12 +188,13 @@ Because BGE's top-1 similarity is high on nearly all SciFact claims, the
 confidence gate rarely fires---at most \SciCorrMaxFire{} of queries even at an
 aggressive threshold---so the corrective pass behaves almost identically to plain
 fusion at negligible extra cost (\CorrMs{} vs.\ \BaseMs{} ms/query). The contrast
-with reranking is the point (Table~\ref{tab:cost}): the cross-encoder reranker is
-\RerankSlowdown$\times$ slower (\RerankMs{} ms/query) and actually \emph{lowers}
-nDCG@10 (\RerankND{} vs.\ \BaseND{}) on this shortlist. Spending a second pass on
-confidence-gated re-retrieval rather than a reranker is the better default; and
-where a strong embedder already retrieves confidently, the cheapest effective
-second pass is often none at all.
+with reranking is purely cost: the cross-encoder reranker is \RerankSlowdown$\times$
+slower (\RerankMs{} ms/query) for no measurable nDCG@10 gain over plain fusion
+(\RerankND{} vs.\ \BaseND{}; Table~\ref{tab:cost}, timed on the same 120 queries).
+Neither second pass earns its keep on these benchmarks: the reranker is far more
+expensive for nothing, and the corrective gate, where a strong embedder already
+retrieves confidently, simply does not fire---a genuinely negative result we report
+rather than dress up.
 
 \begin{table}[t]
 \centering
@@ -219,17 +220,16 @@ relatedness (\FaithNliAuroc{}) only marginally above lexical overlap
 as detection against baselines that can lose, rather than against a citation
 check that scores zero by construction, a content-inspecting signal is a real,
 usable measure of support, and the cross-encoder already in the retrieval
-pipeline doubles as the best cheap verifier on this task. The selective-prediction
-view sharpens this: the cross-encoder is also far better \emph{calibrated} (ECE
-\FaithCeEce{} vs.\ the NLI model's \FaithNliEce{}), so its score is trustworthy as
-an abstention confidence, whereas the NLI relatedness is miscalibrated and unsafe
-to threshold directly.
+pipeline doubles as the best cheap verifier on this task. We report only the
+threshold-free ROC-AUC and PR-AUC, on which the ordering is unambiguous; turning
+this signal into a calibrated abstention gate (with post-hoc calibration and a
+held-out threshold split) is left to future work, since the raw scorer outputs
+are on different scales and not directly comparable as confidences.
 
 \begin{table}[t]
 \centering
-\caption{Evidence-sentence detection on SciFact dev. ROC-AUC/PR-AUC are
-threshold-free; F1 at the best threshold; AURC is the risk-coverage area and ECE
-the calibration error (both lower is better). Best in bold.}
+\caption{Evidence-sentence detection on SciFact dev. ROC-AUC and PR-AUC are
+threshold-free; F1 is at the best threshold. Best in bold.}
 \label{tab:faith}
 \small
 \input{tables/faithfulness}
