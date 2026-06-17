@@ -37,8 +37,8 @@ re-queries only when the first pass is weak, and find it matches plain fusion at
 negligible cost while a cross-encoder reranker is far slower and no better.
 Finally, we recast faithfulness verification as evidence detection and find that
 a relevance cross-encoder---not a dedicated NLI model---is the strongest cheap
-verifier (\FaithCeAuroc{} vs.\ \FaithNliAuroc{} ROC-AUC). Every number is
-regenerated from committed results by \texttt{make eval} on a CPU laptop.
+verifier (\FaithCeAuroc{} vs.\ \FaithNliAuroc{} ROC-AUC). Every table is
+regenerated on a CPU laptop by three \texttt{make} targets, with no API keys.
 Code and data: \url{https://github.com/urme-b/NexusRAG}.
 \end{abstract}
 
@@ -154,7 +154,11 @@ complementary: on NFCorpus it is the best single system (\NFhybrid{} vs.\ BM25
 \NFbm{}, $p{=}\NFhybridP{}$), and on SciFact it beats BM25 (\SciHybrid{},
 $p{=}\SciHybridP{}$) while raising recall, even though it does not exceed the
 already-strong dense model on nDCG. Both fusion contrasts survive Holm
-correction.
+correction. The last two rungs are deliberately included as negative results:
+query-adaptive fusion weights leave nDCG@10 within $0.001$ of plain fusion on
+both corpora, and the corrective pass (Section~\ref{sec:corrective}) is
+likewise flat---we keep them in the ladder, labelled as the no-ops they are,
+rather than quietly dropping the rungs that did not pan out.
 
 \begin{table}[t]
 \centering
@@ -183,6 +187,7 @@ documents). Same conventions as Table~\ref{tab:scifact}.}
 \end{figure}
 
 \subsection{The corrective loop: quality at a fraction of the cost}
+\label{sec:corrective}
 
 Because BGE's top-1 similarity is high on nearly all SciFact claims, the
 confidence gate rarely fires---at most \SciCorrMaxFire{} of queries even at an
