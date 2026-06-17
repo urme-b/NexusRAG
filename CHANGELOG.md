@@ -27,9 +27,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Streaming responses now run citation and grounding verification.
 - Quickstart notebook ships with a tracked sample document.
 
+### Methodology
+- Report paired bootstrap CIs of the per-query delta vs BM25 (the strongest
+  baseline); both Hybrid-vs-BM25 CIs exclude zero.
+- Honest negative result: the cross-encoder reranker lowers nDCG@10 and
+  Recall@20 at ~45x latency on abstract corpora.
+- Pinned BEIR dataset revisions; record RRF k=60 and the bootstrap seed.
+- Paper gains a Limitations and Reproducibility section; `docs/ARCHITECTURE.md`
+  documents component-level limitations.
+
 ### Infrastructure
-- GitHub Actions CI (lint, type-check, test matrix + offline eval smoke).
-- Pinned `requirements.lock` for reproducible environments.
-- Contributing guide, code of conduct, and issue/PR templates.
+- GitHub Actions CI (lint, type-check, test matrix + offline eval smoke,
+  gitleaks, pip-audit) and Dependabot.
+- API security: key auth, slowapi rate limits, libmagic upload validation,
+  /docs gating, pinned model revisions, hash-locked Docker dependencies.
+- Pinned `requirements.lock` / `requirements-runtime.lock`, contributing guide,
+  code of conduct, and issue/PR templates.
 
 [0.1.0]: https://github.com/urme-b/NexusRAG/releases/tag/v0.1.0
