@@ -7,6 +7,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [1.0.1] - 2026-07-03
 
 ### Fixed
+- API reported a stale `0.1.1` version (OpenAPI schema and `/api/metrics`);
+  both now use `nexusrag.__version__`, and pyproject reads the same value via
+  a dynamic version, leaving a single declaration.
+- Single source of truth for API limits: the dead `MAX_FILE_SIZE_*` constants
+  are gone (upload cap was already `API_MAX_UPLOAD_MB`), the query-length cap
+  now comes from `RETRIEVAL_MAX_QUERY_LENGTH` (default 2000, matching the
+  previously enforced value — the old 512 default was never read), and the
+  document-ID length check reuses the store's `MAX_ID_LENGTH`.
+- `configs/default.yaml` documented `0.0.0.0` as the default API host; the
+  actual (and safer) default is `127.0.0.1`.
 - CI now checks formatting (`ruff format --check`), with ruff pinned so the
   formatter cannot drift between local, pre-commit, and CI.
 - README coverage figure corrected to the measured 60% branch coverage.
