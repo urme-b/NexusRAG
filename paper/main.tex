@@ -27,7 +27,7 @@ BEIR benchmarks---SciFact (\NumQueries{} claims, \CorpusSize{} abstracts) and
 NFCorpus (\NFqueries{} queries, \NFcorpus{} documents)---we run a strictly
 additive ablation with exact search, bootstrap confidence intervals, paired
 randomization tests, and Holm correction, entirely on CPU. The dominant factor
-is the embedding model: replacing the common \texttt{all-MiniLM-L6-v2} with
+is the embedding model: replacing the common \texttt{all-MiniLM-L6-v2}~\citep{wang2020minilm} with
 \texttt{bge-small-en-v1.5} moves dense retrieval from below BM25 (\SciDenseMini{}
 nDCG@10) to clearly above it (\SciDense{}), a paired gain of \SciEmbGain{}
 ($p{=}\SciEmbP{}$). Reciprocal-rank fusion then beats BM25 on both corpora
@@ -128,8 +128,10 @@ benchmark of \NFcorpus{} documents and \NFqueries{} test queries. For the
 faithfulness experiment we use the original SciFact release, which adds
 sentence-level evidence labels (\FaithClaims{} dev claims with evidence).
 
-\paragraph{Metrics.} We report nDCG@10, Recall@$\{5,10,20\}$, MRR, and MAP with
-binary relevance, each system retrieving to depth 50. We compute 95\% confidence
+\paragraph{Metrics.} We report nDCG@10 with graded relevance (the
+BEIR/\texttt{pytrec\_eval} $2^{\mathrm{rel}}-1$ gain, so NFCorpus's graded qrels
+are used as-is), and Recall@$\{5,10,20\}$, MRR, and MAP with binary relevance,
+each system retrieving to depth 50. We compute 95\% confidence
 intervals by bootstrapping over queries ($10{,}000$ resamples) and test each
 system against BM25 with a two-sided paired randomization test ($10{,}000$
 permutations, add-one estimator), applying a Holm correction across the family of
@@ -242,8 +244,9 @@ relevance cross-encoder, and evaluate as threshold-free detection over
 Table~\ref{tab:faith} reports the result, and it is a useful corrective to the
 intuition that an entailment model is the obvious verifier: the relevance
 cross-encoder is the strongest detector (\FaithCeAuroc{} ROC-AUC,
-$\FaithCeMinusNli{}$ over NLI), with a claim-bootstrap 95\% CI that clears both
-baselines. NLI relatedness (\FaithNliAuroc{}, 95\% CI
+$\FaithCeMinusNli{}$ over NLI), with a claim-bootstrap 95\% CI that clears the
+lexical baseline (non-overlapping intervals), though its lower bound dips into
+the top of the NLI interval. NLI relatedness (\FaithNliAuroc{}, 95\% CI
 \FaithNliAurocLo{}--\FaithNliAurocHi{}) is statistically indistinguishable from
 lexical overlap (\FaithLexAuroc{})---their intervals almost entirely
 overlap---so the dedicated entailment model is weak here: it is only marginally
@@ -305,8 +308,8 @@ is untested. Generalization to other BEIR tasks (e.g.\ FiQA, SciDocs), domain
 sentence encoders (SPECTER2, SciNCL), additional neural baselines (learned-sparse
 SPLADE, ColBERTv2, monoT5), end-to-end answer-quality evaluation (RAGAS or
 LLM-as-judge), and full-paper chunking ablations are all future work and are
-\emph{not} claimed here. We use binary relevance, so the NFCorpus numbers are not
-directly comparable to graded-nDCG leaderboard scores.
+\emph{not} claimed here. nDCG@10 uses graded relevance (the BEIR convention);
+Recall, MRR, and MAP treat any positively-graded document as relevant.
 
 \paragraph{Fusion and verifier caveats.} RRF uses the standard constant
 $k{=}\RRFk{}$; a sensitivity sweep over $k$ is left to future work. The
