@@ -6,6 +6,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.0.1] - 2026-07-03
 
+### Changed
+- Duplicate detection ignores whitespace-only differences: document IDs hash
+  whitespace-normalized content, so re-uploading a trivially reformatted file
+  is recognized as the same document (IDs of previously ingested documents
+  change once on re-ingest).
+- `GET /api/documents` is paginated (`limit` default 100, max 1000; `offset`);
+  `total_documents` still reports the full corpus size.
+- CORS now allows only the methods and headers the API uses
+  (GET/POST/DELETE, Content-Type/X-API-Key) instead of wildcards.
+- The hierarchical chunker's two near-duplicate accumulation loops were
+  unified into one shared, branch-tested paragraph packer (identical output).
+- `Embedder.unload()` is public; the pipeline no longer pokes private state.
+
 ### Fixed
 - Out-of-range citations (e.g. `[9]` with five sources) are now detected and
   reported by the answer verifier; a redundant pre-strip in the synthesizer
