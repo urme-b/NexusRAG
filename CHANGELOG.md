@@ -18,8 +18,36 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The hierarchical chunker's two near-duplicate accumulation loops were
   unified into one shared, branch-tested paragraph packer (identical output).
 - `Embedder.unload()` is public; the pipeline no longer pokes private state.
+- GitHub Actions are pinned to commit SHAs (supply-chain hardening for the
+  Trusted-Publishing workflow); dead code removed across the package.
+- Paper/README corrections: nDCG@10 described as graded (not binary) relevance,
+  the reranker's latency multiplier is a consistent ~67x, the cross-encoder CI
+  claim no longer overstates separation from NLI, and grounding is documented
+  as opt-in.
 
 ### Fixed
+- Chunking no longer loses text: a short document (below `min_chunk_size`) now
+  yields a chunk instead of zero, a section's under-min tail keeps its own
+  section/page metadata instead of being merged into the previous section's
+  chunk, and a boundary-less oversized paragraph is hard-wrapped under
+  `max_chunk_size`.
+- Parsing keeps body text that appears before the first heading in DOCX and
+  Markdown (previously dropped and unretrievable).
+- Vague-query rewriting only fires on the whole query; a specific question like
+  "summarize the CRISPR methods" is no longer replaced with a generic prompt.
+- BM25 retrieval reads a single index snapshot, so a concurrent ingest cannot
+  desync scores from chunks.
+- Config `temperature` is honored end-to-end (threaded through to the LLM call);
+  the reranker reports a neutral score when all candidates tie; grounding uses a
+  sigmoid for single-logit cross-encoders instead of a degenerate softmax;
+  `is_available()` treats a malformed Ollama response as unavailable.
+- The eval significance reference is pinned to the corrective pipeline, so an
+  optional `--rerank`/`--splade` rung can't silently become the baseline.
+- Docker image is multi-stage: the compiler toolchain stays in the build stage
+  and no longer ships in the runtime image; the frontend path resolves in the
+  container; compose drives the pulled and queried model from one variable.
+- Committed benchmark JSONs carry the derived paired-delta CIs, p-values,
+  `rrf_k`, and pinned dataset revisions that `run.py` now emits.
 - Out-of-range citations (e.g. `[9]` with five sources) are now detected and
   reported by the answer verifier; a redundant pre-strip in the synthesizer
   had silenced that warning, and `raw_response` now holds the actual raw LLM
@@ -53,7 +81,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   actual (and safer) default is `127.0.0.1`.
 - CI now checks formatting (`ruff format --check`), with ruff pinned so the
   formatter cannot drift between local, pre-commit, and CI.
-- README coverage figure corrected to the measured 60% branch coverage.
+- README coverage figure corrected to the measured branch coverage.
 - PyPI classifier updated from Alpha to Production/Stable to match 1.0.
 
 ## [1.0.0] - 2026-07-02
@@ -107,7 +135,7 @@ checks and a fully local pipeline (Ollama). No functional changes since
 - Report paired bootstrap CIs of the per-query delta vs BM25 (the strongest
   baseline); both Hybrid-vs-BM25 CIs exclude zero.
 - Honest negative result: the cross-encoder reranker lowers nDCG@10 and
-  Recall@20 at ~45x latency on abstract corpora.
+  Recall@20 at ~67x latency on abstract corpora.
 - Pinned BEIR dataset revisions; record RRF k=60 and the bootstrap seed.
 - Paper gains a Limitations and Reproducibility section; `docs/ARCHITECTURE.md`
   documents component-level limitations.
