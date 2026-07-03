@@ -7,6 +7,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [1.0.1] - 2026-07-03
 
 ### Fixed
+- Out-of-range citations (e.g. `[9]` with five sources) are now detected and
+  reported by the answer verifier; a redundant pre-strip in the synthesizer
+  had silenced that warning, and `raw_response` now holds the actual raw LLM
+  output.
+- `LLM_MAX_TOKENS` is honored: the synthesizer's token budget still scales
+  with source count but is capped by config (default 768, the previous
+  effective cap) instead of a hardcoded constant.
+- Concurrent API writes can no longer corrupt the BM25 index: a pipeline
+  write lock serializes ingest/delete/clear (previously two simultaneous
+  uploads could silently drop a document from sparse retrieval).
+- DocumentStore heals itself after a crash between its two atomic writes:
+  orphaned doc files are re-adopted and phantom index entries dropped on
+  load; delete order no longer risks entries that block re-ingestion.
+- Retrieval scores are clamped to [0, 1] (an opposite-direction vector could
+  yield a negative cosine similarity that broke threshold assumptions).
+- Password-protected and scanned (image-only) PDFs now fail with actionable
+  messages instead of a generic ingestion error; `ingest_directory` reports
+  skipped unsupported files instead of silently ignoring them.
+- SECURITY.md describes rate limiting accurately (per-IP fixed-window,
+  in-process, single-instance scope); ARCHITECTURE.md documents executor
+  concurrency limits and why multi-worker scaling needs shared state.
 - API reported a stale `0.1.1` version (OpenAPI schema and `/api/metrics`);
   both now use `nexusrag.__version__`, and pyproject reads the same value via
   a dynamic version, leaving a single declaration.
