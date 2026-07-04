@@ -45,7 +45,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   desync scores from chunks.
 - `BM25Retriever.add_incremental` is idempotent by chunk id, so a lazy
   cold-start rebuild that observes a document's just-written chunks can no
-  longer double-count them.
+  longer double-count them; `_persist`/`delete_document` now assert the sparse
+  and dense indexes hold the same number of chunks so any future desync fails
+  loudly instead of silently.
+
+### Changed
+- One canonical sentence-boundary rule (`nexusrag.utils.text.split_sentences`)
+  shared by chunking and grounding, replacing two slightly different regexes.
+- `ingest` and `ingest_bytes` share one `_ingest_document` body instead of
+  duplicating the chunk/embed/persist logic.
 - Config `temperature` is honored end-to-end (threaded through to the LLM call);
   the reranker reports a neutral score when all candidates tie; grounding uses a
   sigmoid for single-logit cross-encoders instead of a degenerate softmax;
