@@ -37,6 +37,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   "summarize the CRISPR methods" is no longer replaced with a generic prompt.
 - BM25 retrieval reads a single index snapshot, so a concurrent ingest cannot
   desync scores from chunks.
+- `BM25Retriever.add_incremental` is idempotent by chunk id, so a lazy
+  cold-start rebuild that observes a document's just-written chunks can no
+  longer double-count them.
 - Config `temperature` is honored end-to-end (threaded through to the LLM call);
   the reranker reports a neutral score when all candidates tie; grounding uses a
   sigmoid for single-logit cross-encoders instead of a degenerate softmax;
