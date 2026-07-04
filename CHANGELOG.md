@@ -54,6 +54,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   shared by chunking and grounding, replacing two slightly different regexes.
 - `ingest` and `ingest_bytes` share one `_ingest_document` body instead of
   duplicating the chunk/embed/persist logic.
+- Config knobs are all live now: `SELF_CORRECTION_ENABLED=false` actually
+  disables the corrective loop, and `LOG_LEVEL` is applied at startup. The two
+  never-read knobs (`RETRIEVAL_RERANK_TOP_K`, `RETRIEVAL_SIMILARITY_THRESHOLD`)
+  are removed — the reranker is eval-only and no similarity gate exists.
 - Config `temperature` is honored end-to-end (threaded through to the LLM call);
   the reranker reports a neutral score when all candidates tie; grounding uses a
   sigmoid for single-logit cross-encoders instead of a degenerate softmax;
