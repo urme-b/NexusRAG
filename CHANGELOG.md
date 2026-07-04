@@ -29,8 +29,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Chunking no longer loses text: a short document (below `min_chunk_size`) now
   yields a chunk instead of zero, a section's under-min tail keeps its own
   section/page metadata instead of being merged into the previous section's
-  chunk, and a boundary-less oversized paragraph is hard-wrapped under
-  `max_chunk_size`.
+  chunk, a boundary-less oversized paragraph is hard-wrapped under
+  `max_chunk_size`, and a short trailing sentence of an oversized paragraph is
+  merged rather than dropped.
+- `LLMSettings` reads `LLM_TEMPERATURE`/`LLM_TIMEOUT`, not bare
+  `TEMPERATURE`/`TIMEOUT`, so unrelated environment variables can no longer
+  override the LLM timeout or generation temperature.
+- The query API returns grounding/citation `warnings`, and the web UI renders
+  them so ungrounded or uncited answers are flagged to the user.
 - Parsing keeps body text that appears before the first heading in DOCX and
   Markdown (previously dropped and unretrievable).
 - Vague-query rewriting only fires on the whole query; a specific question like
@@ -151,6 +157,7 @@ checks and a fully local pipeline (Ollama). No functional changes since
 - Pinned `requirements.lock` / `requirements-runtime.lock`, contributing guide,
   code of conduct, and issue/PR templates.
 
+[1.0.1]: https://github.com/urme-b/NexusRAG/releases/tag/v1.0.1
 [1.0.0]: https://github.com/urme-b/NexusRAG/releases/tag/v1.0.0
 [0.1.1]: https://github.com/urme-b/NexusRAG/releases/tag/v0.1.1
 [0.1.0]: https://github.com/urme-b/NexusRAG/releases/tag/v0.1.0
