@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.0.1] - 2026-07-03
 
+### Added
+- CI enforces a 60% branch-coverage floor and a meta-test that fails on any
+  config field with no reader (guards the dead-knob class of bug).
+- End-to-end test: ingest → query → assert the answer cites a real source.
+- README `Citation` section with BibTeX.
+
 ### Changed
 - Duplicate detection ignores whitespace-only differences: document IDs hash
   whitespace-normalized content, so re-uploading a trivially reformatted file
