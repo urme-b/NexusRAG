@@ -7,6 +7,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [1.0.1] - 2026-07-03
 
 ### Added
+- Every Hugging Face model is revision-pinned: the reranker, NLI, and MiniLM
+  baseline join BGE-small, all resolved through one `HF_REVISIONS` map in
+  config, so faithfulness and baseline numbers cannot drift on a re-fetch.
 - CI enforces a 60% branch-coverage floor and a meta-test that fails on any
   config field with no reader (guards the dead-knob class of bug).
 - `make eval-gate` target; CONTRIBUTING documents running it before pushing.
