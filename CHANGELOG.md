@@ -9,6 +9,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - CI enforces a 60% branch-coverage floor and a meta-test that fails on any
   config field with no reader (guards the dead-knob class of bug).
+- `make eval-gate` target; CONTRIBUTING documents running it before pushing.
+
+### Fixed
+- Corrective retrieval no longer runs the dense pass twice per query — the
+  confidence score comes from the single first-pass dense retrieval.
+- The adaptive-fusion technical-word heuristic strips punctuation, so a
+  natural-language query ending in "…classification." is not misread as lexical.
+- `Embedder.similarity` guards against a zero vector (returns 0, not NaN).
+- The LLM client no longer retries on a read timeout (a slow model previously
+  multiplied the hang up to ~3 minutes); it fails fast after one timeout.
+- `clear_all` resets the BM25 handle directly instead of rebuilding the index
+  from the store only to discard it.
+- The server logs why interactive docs are disabled (API key / config).
 - End-to-end test: ingest → query → assert the answer cites a real source.
 - README `Citation` section with BibTeX.
 
