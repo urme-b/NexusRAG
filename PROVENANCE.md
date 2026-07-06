@@ -12,21 +12,18 @@ generator) and cached locally; none are vendored in this repo.
 
 | Model | Role | Source | Pinned version | License | Trained here? |
 | --- | --- | --- | --- | --- | --- |
-| `BAAI/bge-small-en-v1.5` | dense embeddings (default) | [HF](https://huggingface.co/BAAI/bge-small-en-v1.5) | revision `5c38ec7c405ec4b44b94cc5a9bb96e735b38267a` (pinned in `src/nexusrag/config.py`) | MIT | No — off-the-shelf |
-| `sentence-transformers/all-MiniLM-L6-v2` | dense embeddings (baseline for the ablation) | [HF](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) | latest at fetch (not pinned; baseline only) | Apache-2.0 | No — off-the-shelf |
-| `cross-encoder/ms-marco-MiniLM-L-6-v2` | cross-encoder reranker (evaluated, off by default) | [HF](https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2) | latest at fetch (not pinned) | Apache-2.0 | No — off-the-shelf |
-| `cross-encoder/nli-deberta-v3-small` | grounding / evidence-detection NLI | [HF](https://huggingface.co/cross-encoder/nli-deberta-v3-small) | latest at fetch (not pinned) | Apache-2.0 | No — off-the-shelf |
+| `BAAI/bge-small-en-v1.5` | dense embeddings (default) | [HF](https://huggingface.co/BAAI/bge-small-en-v1.5) | revision `5c38ec7c405ec4b44b94cc5a9bb96e735b38267a` | MIT | No — off-the-shelf |
+| `sentence-transformers/all-MiniLM-L6-v2` | dense embeddings (baseline for the ablation) | [HF](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) | revision `1110a243fdf4706b3f48f1d95db1a4f5529b4d41` | Apache-2.0 | No — off-the-shelf |
+| `cross-encoder/ms-marco-MiniLM-L-6-v2` | cross-encoder reranker (evaluated, off by default) | [HF](https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2) | revision `c5ee24cb16019beea0893ab7796b1df96625c6b8` | Apache-2.0 | No — off-the-shelf |
+| `cross-encoder/nli-deberta-v3-small` | grounding / evidence-detection NLI | [HF](https://huggingface.co/cross-encoder/nli-deberta-v3-small) | revision `fa2804872c3b4bd748f38c0185cc85775361e735` | Apache-2.0 | No — off-the-shelf |
 | `llama3.2:3b` | answer generation (via Ollama) | [Ollama](https://ollama.com/library/llama3.2) | tag `3b` (pinned in `src/nexusrag/config.py`) | Llama 3.2 Community License | No — off-the-shelf |
 
-The embedding model is pinned to a specific Hugging Face git revision as a
-supply-chain control: the SHA is a content-addressed commit id, so the exact
-weight files that produced the reported numbers can be re-fetched with
-`revision=5c38ec7c405ec4b44b94cc5a9bb96e735b38267a`. The reranker, NLI, and
-MiniLM baseline are not revision-pinned today — they affect only ancillary
-comparisons (reranker is off by default; MiniLM is the "worse baseline" in the
-ablation), not the headline BGE-small pipeline. Pinning them is tracked as
-follow-up. Ollama pins the generator by tag only (Ollama exposes a digest per
-tag, not committed here).
+Every Hugging Face model is pinned to a specific git revision as a supply-chain
+control: the SHA is a content-addressed commit id, so the exact weight files
+that produced the reported numbers can be re-fetched at any time. The single
+source of truth is `HF_REVISIONS` in `src/nexusrag/config.py`; every loader
+resolves through it. Ollama pins the generator by tag only (Ollama exposes a
+digest per tag, not committed here).
 
 ## Corpora
 
