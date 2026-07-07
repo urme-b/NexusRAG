@@ -15,6 +15,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `make eval-gate` target; CONTRIBUTING documents running it before pushing.
 
 ### Fixed
+- `.env` files are actually loaded: `load_dotenv()` runs at config import.
+  The dependency was declared but never called, so a documented `.env` was
+  silently ignored; a subprocess test now guards the behavior.
 - Corrective retrieval no longer runs the dense pass twice per query — the
   confidence score comes from the single first-pass dense retrieval.
 - The adaptive-fusion technical-word heuristic strips punctuation, so a
@@ -27,27 +30,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The server logs why interactive docs are disabled (API key / config).
 - End-to-end test: ingest → query → assert the answer cites a real source.
 - README `Citation` section with BibTeX.
-
-### Changed
-- Duplicate detection ignores whitespace-only differences: document IDs hash
-  whitespace-normalized content, so re-uploading a trivially reformatted file
-  is recognized as the same document (IDs of previously ingested documents
-  change once on re-ingest).
-- `GET /api/documents` is paginated (`limit` default 100, max 1000; `offset`);
-  `total_documents` still reports the full corpus size.
-- CORS now allows only the methods and headers the API uses
-  (GET/POST/DELETE, Content-Type/X-API-Key) instead of wildcards.
-- The hierarchical chunker's two near-duplicate accumulation loops were
-  unified into one shared, branch-tested paragraph packer (identical output).
-- `Embedder.unload()` is public; the pipeline no longer pokes private state.
-- GitHub Actions are pinned to commit SHAs (supply-chain hardening for the
-  Trusted-Publishing workflow); dead code removed across the package.
-- Paper/README corrections: nDCG@10 described as graded (not binary) relevance,
-  the reranker's latency multiplier is a consistent ~67x, the cross-encoder CI
-  claim no longer overstates separation from NLI, and grounding is documented
-  as opt-in.
-
-### Fixed
 - Chunking no longer loses text: a short document (below `min_chunk_size`) now
   yields a chunk instead of zero, a section's under-min tail keeps its own
   section/page metadata instead of being merged into the previous section's
@@ -70,27 +52,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   longer double-count them; `_persist`/`delete_document` now assert the sparse
   and dense indexes hold the same number of chunks so any future desync fails
   loudly instead of silently.
-
-### Changed
-- One canonical sentence-boundary rule (`nexusrag.utils.text.split_sentences`)
-  shared by chunking and grounding, replacing two slightly different regexes.
-- `ingest` and `ingest_bytes` share one `_ingest_document` body instead of
-  duplicating the chunk/embed/persist logic.
-- Config knobs are all live now: `SELF_CORRECTION_ENABLED=false` actually
-  disables the corrective loop, and `LOG_LEVEL` is applied at startup. The two
-  never-read knobs (`RETRIEVAL_RERANK_TOP_K`, `RETRIEVAL_SIMILARITY_THRESHOLD`)
-  are removed — the reranker is eval-only and no similarity gate exists.
-- Config `temperature` is honored end-to-end (threaded through to the LLM call);
-  the reranker reports a neutral score when all candidates tie; grounding uses a
-  sigmoid for single-logit cross-encoders instead of a degenerate softmax;
-  `is_available()` treats a malformed Ollama response as unavailable.
-- The eval significance reference is pinned to the corrective pipeline, so an
-  optional `--rerank`/`--splade` rung can't silently become the baseline.
-- Docker image is multi-stage: the compiler toolchain stays in the build stage
-  and no longer ships in the runtime image; the frontend path resolves in the
-  container; compose drives the pulled and queried model from one variable.
-- Committed benchmark JSONs carry the derived paired-delta CIs, p-values,
-  `rrf_k`, and pinned dataset revisions that `run.py` now emits.
 - Out-of-range citations (e.g. `[9]` with five sources) are now detected and
   reported by the answer verifier; a redundant pre-strip in the synthesizer
   had silenced that warning, and `raw_response` now holds the actual raw LLM
@@ -122,10 +83,52 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   document-ID length check reuses the store's `MAX_ID_LENGTH`.
 - `configs/default.yaml` documented `0.0.0.0` as the default API host; the
   actual (and safer) default is `127.0.0.1`.
-- CI now checks formatting (`ruff format --check`), with ruff pinned so the
-  formatter cannot drift between local, pre-commit, and CI.
 - README coverage figure corrected to the measured branch coverage.
 - PyPI classifier updated from Alpha to Production/Stable to match 1.0.
+
+### Changed
+- Duplicate detection ignores whitespace-only differences: document IDs hash
+  whitespace-normalized content, so re-uploading a trivially reformatted file
+  is recognized as the same document (IDs of previously ingested documents
+  change once on re-ingest).
+- `GET /api/documents` is paginated (`limit` default 100, max 1000; `offset`);
+  `total_documents` still reports the full corpus size.
+- CORS now allows only the methods and headers the API uses
+  (GET/POST/DELETE, Content-Type/X-API-Key) instead of wildcards.
+- The hierarchical chunker's two near-duplicate accumulation loops were
+  unified into one shared, branch-tested paragraph packer (identical output).
+- `Embedder.unload()` is public; the pipeline no longer pokes private state.
+- GitHub Actions are pinned to commit SHAs (supply-chain hardening for the
+  Trusted-Publishing workflow); dead code removed across the package.
+- Paper/README corrections: nDCG@10 described as graded (not binary) relevance,
+  the reranker's latency multiplier is a consistent ~67x, the cross-encoder CI
+  claim no longer overstates separation from NLI, and grounding is documented
+  as opt-in.
+- One canonical sentence-boundary rule (`nexusrag.utils.text.split_sentences`)
+  shared by chunking and grounding, replacing two slightly different regexes.
+- `ingest` and `ingest_bytes` share one `_ingest_document` body instead of
+  duplicating the chunk/embed/persist logic.
+- Config knobs are all live now: `SELF_CORRECTION_ENABLED=false` actually
+  disables the corrective loop, and `LOG_LEVEL` is applied at startup. The two
+  never-read knobs (`RETRIEVAL_RERANK_TOP_K`, `RETRIEVAL_SIMILARITY_THRESHOLD`)
+  are removed — the reranker is eval-only and no similarity gate exists.
+- Config `temperature` is honored end-to-end (threaded through to the LLM call);
+  the reranker reports a neutral score when all candidates tie; grounding uses a
+  sigmoid for single-logit cross-encoders instead of a degenerate softmax;
+  `is_available()` treats a malformed Ollama response as unavailable.
+- The eval significance reference is pinned to the corrective pipeline, so an
+  optional `--rerank`/`--splade` rung can't silently become the baseline.
+- Docker image is multi-stage: the compiler toolchain stays in the build stage
+  and no longer ships in the runtime image; the frontend path resolves in the
+  container; compose drives the pulled and queried model from one variable.
+- Committed benchmark JSONs carry the derived paired-delta CIs, p-values,
+  `rrf_k`, and pinned dataset revisions that `run.py` now emits.
+- CI now checks formatting (`ruff format --check`), with ruff pinned so the
+  formatter cannot drift between local, pre-commit, and CI.
+- PyYAML is a dev-only dependency (only tests read YAML); removed the dead
+  `R20` alias and the unused `DocumentStore.list_all`; SECURITY.md's
+  supported-versions table reflects the 1.0.x line; the config reference no
+  longer documents logging knobs that do not exist.
 
 ## [1.0.0] - 2026-07-02
 
