@@ -97,7 +97,10 @@ class TestSameSiteGuard:
         assert exc.value.status_code == 403
 
     async def test_same_origin_fetch_allowed(self) -> None:
-        assert await security.require_same_site(self._request({"sec-fetch-site": "same-origin"})) is None
+        assert (
+            await security.require_same_site(self._request({"sec-fetch-site": "same-origin"}))
+            is None
+        )
 
     async def test_user_initiated_allowed(self) -> None:
         # Sec-Fetch-Site: none == typed URL / bookmark, not an attack surface.
