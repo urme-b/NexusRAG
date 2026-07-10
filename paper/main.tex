@@ -176,8 +176,9 @@ zero, so the improvement is statistically real but small in magnitude---a
 reliable few hundredths of nDCG@10, not a transformative gain. Both fusion
 contrasts also survive Holm correction. The last two rungs are deliberately
 included as negative results:
-query-adaptive fusion weights leave nDCG@10 within $0.001$ of plain fusion on
-both corpora, and the corrective pass (Section~\ref{sec:corrective}) is
+query-adaptive fusion weights leave nDCG@10 within $0.006$ of plain fusion on
+both corpora ($0.001$ on SciFact, $0.006$ on NFCorpus), and the corrective pass
+(Section~\ref{sec:corrective}) is
 likewise flat---we keep them in the ladder, labelled as the no-ops they are,
 rather than quietly dropping the rungs that did not pan out.
 
