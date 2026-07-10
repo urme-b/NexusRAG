@@ -75,8 +75,7 @@ class HybridRetriever:
         """Fused results plus the top dense cosine score, from one dense pass."""
         return self._run(query, top_k, depth)
 
-    def retrieve_dense_only(self, query: str, top_k: int = 10) -> list[RetrievalResult]:
-        return self.dense.retrieve(query, top_k)
+
 
 
 class AdaptiveHybridRetriever(HybridRetriever):

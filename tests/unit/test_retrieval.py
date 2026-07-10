@@ -86,10 +86,6 @@ class TestDenseRetriever:
         assert [r.chunk.id for r in results] == ["chunk2", "chunk1"]
         assert all(r.source == "dense" for r in results)
 
-    def test_threshold_filters_low_scores(self, retriever):
-        results = retriever.retrieve_with_threshold("q", top_k=5, min_score=0.8)
-        assert len(results) == 1 and results[0].score >= 0.8
-
 
 class TestHybridRetriever:
     @pytest.fixture
@@ -122,10 +118,7 @@ class TestHybridRetriever:
         with pytest.raises(ValueError):
             HybridRetriever(dense, sparse, dense_weight=-0.1, sparse_weight=0.3)
 
-    def test_single_retriever_paths_skip_fusion(self, dense, sparse):
-        hybrid = HybridRetriever(dense, sparse)
-        assert all(r.source == "dense" for r in hybrid.retrieve_dense_only("q", 3))
-        sparse.retrieve.assert_not_called()
+
 
     def test_empty_results(self, dense, sparse):
         dense.retrieve.return_value = []

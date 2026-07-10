@@ -42,11 +42,3 @@ class DenseRetriever:
 
         return [RetrievalResult(chunk=r.chunk, score=r.score, source="dense") for r in results]
 
-    def retrieve_with_threshold(
-        self,
-        query: str,
-        top_k: int = 5,
-        min_score: float = 0.3,
-    ) -> list[RetrievalResult]:
-        results = self.retrieve(query, top_k)
-        return [r for r in results if r.score >= min_score]
