@@ -1,6 +1,6 @@
 {
   "upload_type": "software",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "title": "NexusRAG: Local Hybrid Retrieval and Faithfulness Evaluation for Scientific Papers",
   "description": "A fully local RAG system that fuses dense (BGE-small) and sparse (BM25) retrieval with reciprocal-rank fusion and a confidence-gated corrective re-retrieval, shipped with a reproducible CPU-only benchmark on SciFact and NFCorpus (nDCG@10, Recall@20 with bootstrap CIs and paired randomization tests) and a faithfulness evaluation framed as evidence detection (ROC-AUC, PR-AUC).",
   "creators": [

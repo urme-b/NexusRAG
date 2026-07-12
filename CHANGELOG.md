@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-07-12
+
+### Changed
+- The import package is renamed `nexusrag` → `scinexusrag` to match the PyPI
+  distribution name; user code now uses `import scinexusrag` and the
+  `scinexusrag` / `scinexusrag-eval` / `scinexusrag-report` console scripts.
+- Dependencies are installed from `pyproject.toml` (Docker build and the CI
+  audit); the hash-pinned lockfiles were removed.
+
+### Fixed
+- BM25 ingestion no longer raises `ZeroDivisionError` on an all-stop-word corpus.
+- Non-UTF-8 `.txt`/`.md` uploads raise an actionable `DocumentParseError`
+  instead of a raw `UnicodeDecodeError`.
+- Document IDs hash the full normalized content, so two documents sharing a long
+  prefix are no longer silently de-duplicated.
+- `LLMClient.generate` wraps a missing `response` field as `LLMError` instead of
+  leaking a `KeyError`.
+
 ## [1.0.1] - 2026-07-03
 
 ### Added

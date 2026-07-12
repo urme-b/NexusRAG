@@ -16,12 +16,12 @@ generator) and cached locally; none are vendored in this repo.
 | `sentence-transformers/all-MiniLM-L6-v2` | dense embeddings (baseline for the ablation) | [HF](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) | revision `1110a243fdf4706b3f48f1d95db1a4f5529b4d41` | Apache-2.0 | No — off-the-shelf |
 | `cross-encoder/ms-marco-MiniLM-L-6-v2` | cross-encoder reranker (evaluated, off by default) | [HF](https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2) | revision `c5ee24cb16019beea0893ab7796b1df96625c6b8` | Apache-2.0 | No — off-the-shelf |
 | `cross-encoder/nli-deberta-v3-small` | grounding / evidence-detection NLI | [HF](https://huggingface.co/cross-encoder/nli-deberta-v3-small) | revision `fa2804872c3b4bd748f38c0185cc85775361e735` | Apache-2.0 | No — off-the-shelf |
-| `llama3.2:3b` | answer generation (via Ollama) | [Ollama](https://ollama.com/library/llama3.2) | tag `3b` (pinned in `src/nexusrag/config.py`) | Llama 3.2 Community License | No — off-the-shelf |
+| `llama3.2:3b` | answer generation (via Ollama) | [Ollama](https://ollama.com/library/llama3.2) | tag `3b` (pinned in `src/scinexusrag/config.py`) | Llama 3.2 Community License | No — off-the-shelf |
 
 Every Hugging Face model is pinned to a specific git revision as a supply-chain
 control: the SHA is a content-addressed commit id, so the exact weight files
 that produced the reported numbers can be re-fetched at any time. The single
-source of truth is `HF_REVISIONS` in `src/nexusrag/config.py`; every loader
+source of truth is `HF_REVISIONS` in `src/scinexusrag/config.py`; every loader
 resolves through it. Ollama pins the generator by tag only (Ollama exposes a
 digest per tag, not committed here).
 
@@ -29,7 +29,7 @@ digest per tag, not committed here).
 
 The retrieval and faithfulness benchmarks use published BEIR / SciFact data,
 downloaded at eval time. Dataset git revisions are pinned in
-`src/nexusrag/eval/datasets.py` so a reported number always references a fixed
+`src/scinexusrag/eval/datasets.py` so a reported number always references a fixed
 snapshot.
 
 | Dataset | Role | Source | Pinned revision | License |
