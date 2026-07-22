@@ -59,8 +59,8 @@ eval = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/urme-b/NexusRAG"
-Repository = "https://github.com/urme-b/NexusRAG"
+Homepage = "https://github.com/urmeo/NexusRAG"
+Repository = "https://github.com/urmeo/NexusRAG"
 
 [project.scripts]
 scinexusrag = "scinexusrag.cli:main"

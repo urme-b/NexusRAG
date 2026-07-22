@@ -5,7 +5,7 @@
 **Local RAG for research papers — ask questions across your PDFs, get answers with citations you can check.**
 Every component is measured on public benchmarks. CI fails the build if quality drops.
 
-[![CI](https://github.com/urme-b/NexusRAG/actions/workflows/ci.yml/badge.svg)](https://github.com/urme-b/NexusRAG/actions/workflows/ci.yml)
+[![CI](https://github.com/urmeo/NexusRAG/actions/workflows/ci.yml/badge.svg)](https://github.com/urmeo/NexusRAG/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](pyproject.toml)
 [![Tests](https://img.shields.io/badge/tests-318-brightgreen.svg)](tests/)
@@ -335,7 +335,7 @@ If you use NexusRAG, please cite it ([CITATION.cff](CITATION.cff)):
              Evaluation for Scientific Papers},
   version = {1.0.2},
   year    = {2026},
-  url     = {https://github.com/urme-b/NexusRAG},
+  url     = {https://github.com/urmeo/NexusRAG},
   license = {MIT}
 }
 ```

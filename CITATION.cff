@@ -4,13 +4,13 @@ type: software
 title: "NexusRAG: Local Hybrid Retrieval and Faithfulness Evaluation for Scientific Papers"
 version: 1.0.2
 date-released: 2026-07-03
-url: "https://github.com/urme-b/NexusRAG"
-repository-code: "https://github.com/urme-b/NexusRAG"
+url: "https://github.com/urmeo/NexusRAG"
+repository-code: "https://github.com/urmeo/NexusRAG"
 license: MIT
 authors:
   - family-names: Bose
     given-names: Urme
-    alias: urme-b
+    alias: urmeo
 keywords:
   - retrieval-augmented-generation
   - information-retrieval
